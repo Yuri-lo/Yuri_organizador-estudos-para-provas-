@@ -1,11 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Organizador de Estudos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet"> 
+    <!-- Fonte do Google Fonts -->
 </head>
 <body>
-    
+    <!-- Cabeçalho -->
+    <header>
+        <div class="container">
+            <h1>Organizador de Estudos para Provas</h1>
+            <p>Acompanhe seus estudos de forma simples e eficiente!</p>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main>
+        <div class="container">
+            <!-- Formulário para adicionar estudo -->
+            <section id="add-study">
+                <h2>Adicionar Novo Estudo</h2>
+                <form id="study-form">
+                    <input type="text" id="materia" placeholder="Matéria" required>
+                    <input type="text" id="topico" placeholder="Tópico" required>
+                    <input type="date" id="data_prova" required>
+                    <button type="submit">Adicionar Estudo</button>
+                </form>
+            </section>
+
+            <!-- Lista de estudos -->
+            <section id="study-list">
+                <h2>Estudos Cadastrados</h2>
+                <ul id="studies">
+                    <!-- A lista de estudos será preenchida aqui dinamicamente -->
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <p>Organizador de Estudos - 2025</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
