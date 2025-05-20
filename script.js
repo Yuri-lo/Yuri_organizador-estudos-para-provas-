@@ -1,80 +1,56 @@
-// Função para atualizar a lista de estudos
-function atualizarListaDeEstudos() {
-    const studiesList = document.getElementById('studies');
-    studiesList.innerHTML = ''; // Limpa a lista antes de repopular
+const form = document.getElementById("study-form");
+const studiesList = document.getElementById("studies");
 
-    // Recuperar estudos do localStorage
-    const estudos = JSON.parse(localStorage.getItem('estudos')) || [];
-
-    // Se não houver estudos, mostrar mensagem
-    if (estudos.length === 0) {
-        const emptyMessage = document.createElement('li');
-        emptyMessage.textContent = 'Nenhum estudo cadastrado';
-        studiesList.appendChild(emptyMessage);
-    } else {
-        estudos.forEach(estudo => {
-            const listItem = document.createElement('li');
-            listItem.classList.add('study-item');
-            listItem.innerHTML = `
-                <div>
-                    <strong>${estudo.materia}</strong> - ${estudo.topico}<br>
-                    <small>Data da prova: ${estudo.data_prova}</small>
-                </div>
-                <button onclick="excluirEstudo(${estudo.id})">Excluir</button>
-            `;
-            studiesList.appendChild(listItem);
-        });
-    }
-}
-
-// Função para adicionar um estudo
-document.getElementById('study-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const materia = document.getElementById('materia').value;
-    const topico = document.getElementById('topico').value;
-    const data_prova = document.getElementById('data_prova').value;
-
-    // Recuperar os estudos do localStorage ou inicializar um array vazio
-    const estudos = JSON.parse(localStorage.getItem('estudos')) || [];
-
-    // Criar um novo estudo
-    const novoEstudo = {
-        id: Date.now(),  // Usando timestamp como ID único
-        materia: materia,
-        topico: topico,
-        data_prova: data_prova
-    };
-
-    // Adicionar o novo estudo ao array
-    estudos.push(novoEstudo);
-
-    // Salvar novamente no localStorage
-    localStorage.setItem('estudos', JSON.stringify(estudos));
-
-    // Limpar os campos do formulário
-    document.getElementById('materia').value = '';
-    document.getElementById('topico').value = '';
-    document.getElementById('data_prova').value = '';
-
-    // Atualizar a lista
-    atualizarListaDeEstudos();
+// Recupera os dados salvos no localStorage ao carregar a página
+document.addEventListener("DOMContentLoaded", () => {
+  const saved = JSON.parse(localStorage.getItem("estudos")) || [];
+  saved.forEach(item => addStudyToList(item));
 });
 
-// Função para excluir um estudo
-function excluirEstudo(id) {
-    // Recuperar estudos do localStorage
-    const estudos = JSON.parse(localStorage.getItem('estudos')) || [];
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
 
-    // Filtrar o estudo que será excluído
-    const estudosAtualizados = estudos.filter(estudo => estudo.id !== id);
+  const subject = document.getElementById("subject").value.trim();
+  const topic = document.getElementById("topic").value.trim();
+  const date = document.getElementById("date").value;
 
-    // Atualizar o localStorage
-    localStorage.setItem('estudos', JSON.stringify(estudosAtualizados));
+  if (!subject || !topic || !date) return;
 
-    // Atualizar a lista de estudos na tela
-    atualizarListaDeEstudos();
+  const study = { subject, topic, date };
+  addStudyToList(study);
+  saveToLocalStorage(study);
+  form.reset();
+});
+
+function addStudyToList(study) {
+  const li = document.createElement("li");
+  li.className = "study-item";
+
+  const text = document.createElement("span");
+  text.textContent = `${study.subject} - ${study.topic} (Prova em: ${study.date})`;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "Remover";
+  removeBtn.onclick = () => {
+    li.remove();
+    removeFromLocalStorage(study);
+  };
+
+  li.appendChild(text);
+  li.appendChild(removeBtn);
+  studiesList.appendChild(li);
 }
 
-// Inicializar a lista de estudos ao carregar a página
-document.addEventListener('DOMContentLoaded', atualizarListaDeEstudos);
+function saveToLocalStorage(study) {
+  const saved = JSON.parse(localStorage.getItem("estudos")) || [];
+  saved.push(study);
+  localStorage.setItem("estudos", JSON.stringify(saved));
+}
+
+function removeFromLocalStorage(studyToRemove) {
+  const saved = JSON.parse(localStorage.getItem("estudos")) || [];
+  const updated = saved.filter(
+    s => s.subject !== studyToRemove.subject || s.topic !== studyToRemove.topic || s.date !== studyToRemove.date
+  );
+  localStorage.setItem("estudos", JSON.stringify(updated));
+}
