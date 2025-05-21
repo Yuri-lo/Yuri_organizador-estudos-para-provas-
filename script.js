@@ -1,10 +1,12 @@
 const form = document.getElementById("study-form");
 const studiesList = document.getElementById("studies");
 
-// Recupera os dados salvos no localStorage ao carregar a página
+let estudos = [];
+
 document.addEventListener("DOMContentLoaded", () => {
   const saved = JSON.parse(localStorage.getItem("estudos")) || [];
-  saved.forEach(item => addStudyToList(item));
+  estudos = saved;
+  exibirEstudosOrdenados();
 });
 
 form.addEventListener("submit", function (e) {
@@ -17,40 +19,44 @@ form.addEventListener("submit", function (e) {
   if (!subject || !topic || !date) return;
 
   const study = { subject, topic, date };
-  addStudyToList(study);
-  saveToLocalStorage(study);
+  estudos.push(study);
+  salvarEstudos();
+  exibirEstudosOrdenados();
   form.reset();
 });
 
-function addStudyToList(study) {
-  const li = document.createElement("li");
-  li.className = "study-item";
-
-  const text = document.createElement("span");
-  text.textContent = `${study.subject} - ${study.topic} (Prova em: ${study.date})`;
-
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "Remover";
-  removeBtn.onclick = () => {
-    li.remove();
-    removeFromLocalStorage(study);
-  };
-
-  li.appendChild(text);
-  li.appendChild(removeBtn);
-  studiesList.appendChild(li);
+function salvarEstudos() {
+  localStorage.setItem("estudos", JSON.stringify(estudos));
 }
 
-function saveToLocalStorage(study) {
-  const saved = JSON.parse(localStorage.getItem("estudos")) || [];
-  saved.push(study);
-  localStorage.setItem("estudos", JSON.stringify(saved));
-}
+function exibirEstudosOrdenados() {
+  studiesList.innerHTML = "";
 
-function removeFromLocalStorage(studyToRemove) {
-  const saved = JSON.parse(localStorage.getItem("estudos")) || [];
-  const updated = saved.filter(
-    s => s.subject !== studyToRemove.subject || s.topic !== studyToRemove.topic || s.date !== studyToRemove.date
-  );
-  localStorage.setItem("estudos", JSON.stringify(updated));
+  const ordenado = [...estudos].sort((a, b) => {
+    const numA = parseInt(a.topic.match(/\d+/)); // Extrai número do tópico
+    const numB = parseInt(b.topic.match(/\d+/));
+    return numA - numB;
+  });
+
+  ordenado.forEach(study => {
+    const li = document.createElement("li");
+    li.className = "study-item";
+
+    const text = document.createElement("span");
+    text.textContent = `${study.subject} - ${study.topic} (Prova em: ${study.date})`;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Remover";
+    removeBtn.onclick = () => {
+      estudos = estudos.filter(s =>
+        !(s.subject === study.subject && s.topic === study.topic && s.date === study.date)
+      );
+      salvarEstudos();
+      exibirEstudosOrdenados();
+    };
+
+    li.appendChild(text);
+    li.appendChild(removeBtn);
+    studiesList.appendChild(li);
+  });
 }
