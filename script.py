@@ -8,7 +8,7 @@ class Estudo:
     def __init__(self, materia, topico, data_prova):
         self.materia = materia
         self.topico = topico
-        self.__data_prova = data_prova
+        self.__data_prova = data_prova  # atributo privado
         self.finalizado = False
 
     def exibir_dados(self):
@@ -34,7 +34,6 @@ class Estudo:
     def marcar_como_finalizado(self):
         self.finalizado = True
 
-
 # ==============================
 # SUBCLASSE: EstudoComRevisao
 # ==============================
@@ -50,17 +49,16 @@ class EstudoComRevisao(Estudo):
     def marcar_revisao(self):
         self.revisado = True
 
-
 # ==============================
-# BANCO DE DADOS MYSQL
+# FUNÇÕES DO BANCO DE DADOS MySQL
 # ==============================
 
 def conectar():
     return mysql.connector.connect(
         host="localhost",
-        user="root",         # Altere se necessário
-        password="sua_senha",# Altere para a senha do seu MySQL
-        database="estudos_db"
+        user="root",          # altere conforme seu MySQL
+        password="sua_senha", # altere para sua senha MySQL
+        database="estudos"    # certifique que o banco existe
     )
 
 def criar_tabela():
@@ -80,8 +78,10 @@ def criar_tabela():
 def inserir_estudo(estudo):
     conexao = conectar()
     cursor = conexao.cursor()
-    cursor.execute("INSERT INTO estudos (materia, topico, data_prova) VALUES (%s, %s, %s)",
-                   (estudo.materia, estudo.topico, estudo.get_data_prova()))
+    cursor.execute(
+        "INSERT INTO estudos (materia, topico, data_prova) VALUES (%s, %s, %s)",
+        (estudo.materia, estudo.topico, estudo.get_data_prova())
+    )
     conexao.commit()
     conexao.close()
     print(f"Estudo de {estudo.materia} inserido no banco.\n")
@@ -106,7 +106,6 @@ def excluir_estudo(id_estudo):
     conexao.close()
     print(f"Estudo com ID {id_estudo} excluído do banco.\n")
 
-
 # ==============================
 # BLOCO DE TESTES (main)
 # ==============================
@@ -119,9 +118,12 @@ if __name__ == "__main__":
     estudo1.marcar_como_finalizado()
 
     estudo1.exibir_dados()
+
     dias = estudo1.dias_para_prova()
     print(f"\nFaltam {dias} dias para a prova.\n")
 
     inserir_estudo(estudo1)
     listar_estudos()
+
+    # Para testar exclusão, descomente abaixo:
     # excluir_estudo(1)
