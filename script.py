@@ -1,3 +1,4 @@
+# script.py
 import mysql.connector
 from datetime import datetime
 
@@ -8,7 +9,7 @@ class Estudo:
     def __init__(self, materia, topico, data_prova):
         self.materia = materia
         self.topico = topico
-        self.__data_prova = data_prova  # atributo privado
+        self.__data_prova = data_prova
         self.finalizado = False
 
     def exibir_dados(self):
@@ -27,12 +28,14 @@ class Estudo:
         try:
             hoje = datetime.now()
             data_prova = datetime.strptime(self.__data_prova, "%d/%m/%Y")
-            return (data_prova - hoje).days
+            dias = (data_prova - hoje).days
+            return dias
         except ValueError:
             return None
 
     def marcar_como_finalizado(self):
         self.finalizado = True
+
 
 # ==============================
 # SUBCLASSE: EstudoComRevisao
@@ -49,20 +52,21 @@ class EstudoComRevisao(Estudo):
     def marcar_revisao(self):
         self.revisado = True
 
+
 # ==============================
-# FUNÇÕES DO BANCO DE DADOS MySQL
+# FUNÇÕES DE BANCO DE DADOS (MySQL)
 # ==============================
 
-def conectar():
+def conectar_banco():
     return mysql.connector.connect(
         host="localhost",
-        user="root",          # altere conforme seu MySQL
-        password="sua_senha", # altere para sua senha MySQL
-        database="estudos"    # certifique que o banco existe
+        user="root",
+        password="sua_senha",  # <-- Substitua pela sua senha
+        database="estudos_db"
     )
 
 def criar_tabela():
-    conexao = conectar()
+    conexao = conectar_banco()
     cursor = conexao.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS estudos (
@@ -73,24 +77,26 @@ def criar_tabela():
         )
     """)
     conexao.commit()
+    cursor.close()
     conexao.close()
 
 def inserir_estudo(estudo):
-    conexao = conectar()
+    conexao = conectar_banco()
     cursor = conexao.cursor()
-    cursor.execute(
-        "INSERT INTO estudos (materia, topico, data_prova) VALUES (%s, %s, %s)",
-        (estudo.materia, estudo.topico, estudo.get_data_prova())
-    )
+    sql = "INSERT INTO estudos (materia, topico, data_prova) VALUES (%s, %s, %s)"
+    valores = (estudo.materia, estudo.topico, estudo.get_data_prova())
+    cursor.execute(sql, valores)
     conexao.commit()
+    cursor.close()
     conexao.close()
     print(f"Estudo de {estudo.materia} inserido no banco.\n")
 
 def listar_estudos():
-    conexao = conectar()
+    conexao = conectar_banco()
     cursor = conexao.cursor()
     cursor.execute("SELECT * FROM estudos")
     resultados = cursor.fetchall()
+    cursor.close()
     conexao.close()
 
     print("=== Estudos Cadastrados ===")
@@ -99,17 +105,17 @@ def listar_estudos():
     print()
 
 def excluir_estudo(id_estudo):
-    conexao = conectar()
+    conexao = conectar_banco()
     cursor = conexao.cursor()
     cursor.execute("DELETE FROM estudos WHERE id = %s", (id_estudo,))
     conexao.commit()
+    cursor.close()
     conexao.close()
     print(f"Estudo com ID {id_estudo} excluído do banco.\n")
 
 # ==============================
 # BLOCO DE TESTES (main)
 # ==============================
-
 if __name__ == "__main__":
     criar_tabela()
 
@@ -125,5 +131,4 @@ if __name__ == "__main__":
     inserir_estudo(estudo1)
     listar_estudos()
 
-    # Para testar exclusão, descomente abaixo:
     # excluir_estudo(1)
